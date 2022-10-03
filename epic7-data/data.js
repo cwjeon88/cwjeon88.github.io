@@ -79,16 +79,16 @@ function parse_hero( item )
                 var result = (datasheet.results)[0];
                 // {"_id":"alencia","id":"c1100","name":"Alencia",
                 //  "moonlight":false,"rarity":5,"attribute":"wind","role":"warrior","zodiac":"crab",
-                var ko_lang = "";
-                if (( result.name in g_string_table['heroes'] ))
-                {
-                    ko_lang = g_string_table[ result.name ];
-                }
+                var koname = g_string_table[ result.name ];
+                //if (( result.name in g_string_table['heroes'] ))
+                //{
+                //   koname = g_string_table[ result.name ];
+                //}
                 var hero = { "_id": result._id, "id": result.id, "name": result.name, 
-                             "koname": ko_lang, 
+                             "koname": koname, 
                              "rarity": result.rarity, "attribute": result.attribute, 
                              "role": result.role,
-                             "camping": result.camping, "calculatedStatus": result.calculatedStatus };
+                             "calculatedStatus": result.calculatedStatus };
                              
                 g_heroes.push( hero );
                 
