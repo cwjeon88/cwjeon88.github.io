@@ -20,11 +20,11 @@ function start()
 {
     load_string_table();
     
-    console.log( 'test wanda in string table: ' + g_string_table['heroes']['Wanda'] );
+    // console.log( 'test wanda in string table: ' + g_string_table['heroes']['Wanda'] );
     document.getElementById("p_info").innerText = "Retrieving data from E7 Database API";
 
     var xhttp = new XMLHttpRequest();
-    ///*
+    
     xhttp.onreadystatechange = function() 
     {
         if (this.readyState == 4 && this.status == 200) 
@@ -38,7 +38,6 @@ function start()
                 " status: " + this.status;
         }
     };
-    //*/
     
     xhttp.open("GET", "https://api.epicsevendb.com/hero", true);
     xhttp.send();
@@ -80,10 +79,10 @@ function parse_hero( item )
                 var result = (datasheet.results)[0];
                 // {"_id":"alencia","id":"c1100","name":"Alencia",
                 //  "moonlight":false,"rarity":5,"attribute":"wind","role":"warrior","zodiac":"crab",
-                var hero = { "_id": result._id, "id": result.id, "name": result.name, 
+                var hero = { "id": result.id, "name": result.name, 
                              "rarity": result.rarity, "attribute": result.attribute, 
                              "role": result.role,
-                             "calculatedStatus": result.calculatedStatus };
+                             "camping": result.camping };
                              
                 g_heroes.push( hero );
                 
@@ -110,6 +109,7 @@ function parse_hero( item )
                 // create results
                 var json = {};
                 json['heroes'] = g_heroes;
+                json['invalid_heroes'] = g_invalid_heroes;
                 json['meta'] = g_meta;
                 
                 // dump result
@@ -395,6 +395,30 @@ function load_string_table()
             "Zealot Carmainerose": "전도자 카마인로즈",
             "Zeno": "제노",
             "Zerato": "제라토"
+        },
+        "topics": {
+            "Criticism": "세계 비판",
+            "Reality Check": "현실직시",
+            "Heroic Tale": "무용담",
+            "Comforting Cheer": "위로 응원",
+            "Cute Cheer": "애교 응원",
+            "Heroic Cheer": "영웅적 응원",
+            "Sad Memory": "슬픈 추억",
+            "Joyful Memory": "즐거운 추억",
+            "Happy Memory": "행복한 추억",
+            "Unique Comment": "4차월 발언",
+            "Self-Indulgent": "자아도취",
+            "Occult": "오컬트",
+            "Myth": "신화",
+            "Bizarre Story": "엽기적 이야기",
+            "Food Story": "음식 이야기",
+            "Horror Story": "공포 이야기",
+            "Gossip": "가쉽",
+            "Dream": "꿈",
+            "Advice": "고민 상담",
+            "Complain": "투정",
+            "Belief": "신념",
+            "Interesting Story": "모험이야기"
         }
     };
 }
