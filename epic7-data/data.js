@@ -79,10 +79,10 @@ function parse_hero( item )
                 var result = (datasheet.results)[0];
                 // {"_id":"alencia","id":"c1100","name":"Alencia",
                 //  "moonlight":false,"rarity":5,"attribute":"wind","role":"warrior","zodiac":"crab",
-                var hero = { "id": result.id, "name": result.name, 
+                var hero = { "_id": result._id, "id": result.id, "name": result.name, 
                              "rarity": result.rarity, "attribute": result.attribute, 
                              "role": result.role,
-                             "camping": result.camping };
+                             "camping": result.camping, "calculatedStatus": result.calculatedStatus };
                              
                 g_heroes.push( hero );
                 
