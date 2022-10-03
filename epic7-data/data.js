@@ -18,13 +18,13 @@ var g_string_table = {};
 
 function start() 
 {
-    //load_string_table();
+    load_string_table();
     
-    // console.log( 'test wanda in string table: ' + g_string_table['heroes']['Wanda'] );
-    //document.getElementById("p_info").innerText = "Retrieving data from E7 Database API";
+    console.log( 'test wanda in string table: ' + g_string_table['heroes']['Wanda'] );
+    document.getElementById("p_info").innerText = "Retrieving data from E7 Database API";
 
     var xhttp = new XMLHttpRequest();
-    /*
+    ///*
     xhttp.onreadystatechange = function() 
     {
         if (this.readyState == 4 && this.status == 200) 
@@ -38,7 +38,7 @@ function start()
                 " status: " + this.status;
         }
     };
-    */
+    //*/
     
     xhttp.open("GET", "https://api.epicsevendb.com/hero", true);
     xhttp.send();
@@ -80,10 +80,10 @@ function parse_hero( item )
                 var result = (datasheet.results)[0];
                 // {"_id":"alencia","id":"c1100","name":"Alencia",
                 //  "moonlight":false,"rarity":5,"attribute":"wind","role":"warrior","zodiac":"crab",
-                var hero = { "id": result.id, "name": result.name, 
+                var hero = { "_id": result._id, "id": result.id, "name": result.name, 
                              "rarity": result.rarity, "attribute": result.attribute, 
                              "role": result.role,
-                             "camping": result.camping };
+                             "calculatedStatus": result.calculatedStatus };
                              
                 g_heroes.push( hero );
                 
@@ -110,7 +110,6 @@ function parse_hero( item )
                 // create results
                 var json = {};
                 json['heroes'] = g_heroes;
-                json['invalid_heroes'] = g_invalid_heroes;
                 json['meta'] = g_meta;
                 
                 // dump result
@@ -396,30 +395,6 @@ function load_string_table()
             "Zealot Carmainerose": "전도자 카마인로즈",
             "Zeno": "제노",
             "Zerato": "제라토"
-        },
-        "topics": {
-            "Criticism": "批判世界",
-            "Reality Check": "正視現實",
-            "Heroic Tale": "英雄故事",
-            "Comforting Cheer": "安慰助陣",
-            "Cute Cheer": "撒嬌助陣",
-            "Heroic Cheer": "英雄式助陣",
-            "Sad Memory": "傷心回憶",
-            "Joyful Memory": "愉快回憶",
-            "Happy Memory": "幸福回憶",
-            "Unique Comment": "4次元的發言",
-            "Self-Indulgent": "自我陶醉",
-            "Occult": "秘術",
-            "Myth": "神話",
-            "Bizarre Story": "獵奇的故事",
-            "Food Story": "食物故事",
-            "Horror Story": "恐怖故事",
-            "Gossip": "八卦",
-            "Dream": "夢",
-            "Advice": "煩惱諮詢",
-            "Complain": "耍賴",
-            "Belief": "信念",
-            "Interesting Story": "冒險故事"
         }
     };
 }
