@@ -1,0 +1,68 @@
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-gap: 1mm;
+  padding: 1mm;
+}
+
+
+input[type=text], select {
+  width: 100%;
+  padding: 3mm 4mm;
+  margin: 1mm 0;
+  display: inline-block;
+  border: 0.3mm solid #ccc;
+  border-radius: 1mm;
+  box-sizing: border-box;
+}
+
+input[type=number], select {
+  width: 100%;
+  padding: 3mm 4mm;
+  margin: 1mm 0;
+  display: inline-block;
+  border: 0.3mm solid #ccc;
+  border-radius: 1mm;
+  box-sizing: border-box;
+}
+
+.grid-label {
+  text-align: center;
+}
+
+.grid-result {
+  font-size: 300%;
+  text-align: center;
+  font-weight: bold;
+}
+
+.grid-line {
+  text-align: center;
+  grid-column: 1 / span 3;
+}
+
+.grid-last-two {
+  grid-column: 2 / span 2;
+}
+
+.grid-error {
+  grid-column: 1 / span 3;
+  min-height: 5em;
+  font-size: 100%;
+  font-weight: bold;
+  border-color: WhiteSmoke;
+  border-style: groove;
+}
+
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 3mm 4mm;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 1mm 0;
+  cursor: pointer;
+}
