@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>TorrentBox</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{min-height:100vh;background:#0b0e19;color:#e2e8f0;font-family:'SF Pro Text',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+    .header{background:linear-gradient(180deg,#111827,#0b0e19);padding:20px 16px 14px}
+    .header-inner{max-width:600px;margin:0 auto}
+    .logo{font-size:18px;font-weight:700;letter-spacing:-.3px}
+    .logo-icon{color:#3b82f6}
+    .subtitle{font-size:11px;color:#475569;margin-top:2px}
+    .content{max-width:600px;margin:0 auto;padding:0 16px 130px}
+    .search-bar{position:sticky;top:0;z-index:10;background:#0b0e19;padding:12px 0;display:flex;gap:8px}
+    .search-input{flex:1;padding:11px 14px;font-size:15px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#e2e8f0;outline:none;font-family:inherit}
+    .search-input::placeholder{color:#475569}
+    .search-input:focus{border-color:rgba(59,130,246,.3)}
+    .search-btn{padding:11px 18px;font-size:14px;font-weight:600;background:#3b82f6;color:#fff;border:none;border-radius:10px;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit}
+    .search-btn:disabled{background:#1e293b;color:#475569;cursor:default}
+    .search-btn:not(:disabled):active{transform:scale(.97)}
+    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .spinner{display:inline-block;animation:spin .8s linear infinite}
+    .error-box{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:12px 14px;font-size:13px;color:#fca5a5;margin-bottom:12px;line-height:1.6;word-break:break-word}
+    .loading-state{text-align:center;padding:48px 0;color:#475569;font-size:13px}
+    .empty-state{text-align:center;padding:72px 20px}
+    .empty-icon{font-size:56px;margin-bottom:16px;opacity:.25;color:#334155}
+    .empty-text{font-size:13px;line-height:1.8;color:#334155}
+    .no-results{text-align:center;padding:48px 0;color:#475569;font-size:14px}
+    .results-info{font-size:11px;color:#475569;margin-bottom:8px;padding:0 2px}
+    .card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent}
+    .card:active{transform:scale(.99)}
+    .card.selected{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.4)}
+    .card-title{font-size:14px;font-weight:600;color:#e2e8f0;line-height:1.45;word-break:break-word}
+    .card.selected .card-title{color:#60a5fa}
+    .card-meta{display:flex;gap:14px;margin-top:7px;font-size:12px;color:#64748b;flex-wrap:wrap}
+    .meta-item{display:flex;align-items:center;gap:3px}
+    .meta-item svg{flex-shrink:0}
+    .highlight{color:#fbbf24;font-weight:700}
+    .check-mark{margin-right:5px;font-size:11px;color:#60a5fa}
+    .cat-badge{font-size:10px;background:rgba(255,255,255,.06);color:#64748b;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
+    .pagination{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:14px}
+    .page-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 14px;font-size:12px;color:#64748b;cursor:pointer;font-family:inherit;transition:all .15s}
+    .page-btn:active{transform:scale(.97)}
+    .page-num{padding:8px 12px;font-size:12px;color:#475569}
+    .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(11,14,25,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.06);padding:12px 16px max(12px,env(safe-area-inset-bottom));z-index:20}
+    .bottom-inner{max-width:600px;margin:0 auto}
+    .magnet-label{font-size:11px;color:#475569;margin-bottom:6px;font-weight:600;letter-spacing:.5px}
+    .magnet-row{display:flex;gap:6px}
+    .magnet-input{flex:1;padding:10px 12px;font-size:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;color:#94a3b8;outline:none;font-family:'SF Mono',Menlo,Consolas,monospace;min-width:0}
+    .magnet-input.has-value{border-color:rgba(59,130,246,.25)}
+    .magnet-input::placeholder{color:#1e293b}
+    .copy-btn{padding:10px 12px;font-size:13px;background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.06);border-radius:8px;cursor:pointer}
+    .copy-btn:disabled{background:#111827;color:#1e293b;cursor:default}
+    .send-btn{padding:10px 14px;font-size:13px;font-weight:600;background:#f59e0b;color:#fff;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .15s;min-width:60px;font-family:inherit}
+    .send-btn:disabled{background:#111827;color:#1e293b;cursor:default}
+    .send-btn.pending{background:#1e293b;color:#475569}
+    .send-btn.success{background:#059669}
+    .send-btn:not(:disabled):active{transform:scale(.97)}
+    .success-msg{font-size:11px;color:#34d399;margin-top:6px}
+    .sort-bar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+    .sort-btn{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#475569;cursor:pointer;font-family:inherit;transition:all .15s}
+    .sort-btn.active{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3);color:#60a5fa}
+    .nas-btn{display:none;font-size:12px;font-weight:600;color:#64748b;text-decoration:none;padding:6px 10px;border:1px solid rgba(255,255,255,.08);border-radius:8px;transition:color .15s;}
+    .nas-btn:hover{color:#94a3b8;}
+    @media (min-width:768px){.nas-btn{display:flex;align-items:center;gap:6px;}}
+    .nav-btn{font-size:12px;font-weight:600;color:#3b82f6;text-decoration:none;padding:6px 10px;border:1px solid rgba(59,130,246,.25);border-radius:8px;white-space:nowrap;transition:all .15s;}
+    .nav-btn:hover{background:rgba(59,130,246,.1);}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner" style="display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div class="logo"><span class="logo-icon">⬡</span> Braden TV Downloader</div>
+        <div class="subtitle">BT4G DHT Search → NAS</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <!-- PC only -->
+        <a href="https://QuickConnect.to/braden" target="_blank" class="nas-btn">시놀로지</a>
+        <a href="./downloading" class="nav-btn">다운로드 현황 →</a>
+      </div>
+    </div>
+  </div>
+  <div class="content">
+    <div class="search-bar">
+      <input id="searchInput" class="search-input" type="text" placeholder="검색어 입력..." autofocus>
+      <button id="searchBtn" class="search-btn" disabled>검색</button>
+    </div>
+    <div id="resultArea">
+      <div class="empty-state">
+        <div class="empty-icon">⬡</div>
+        <div class="empty-text">BT4G DHT 네트워크에서 토렌트를 검색합니다<br>검색어를 입력하고 Enter 또는 검색 버튼</div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="bottom-inner">
+      <div class="magnet-label">MAGNET</div>
+      <div class="magnet-row">
+        <input id="magnetInput" class="magnet-input" type="text">
+        <button id="sendBtn" class="send-btn" disabled>다운로드</button>
+      </div>
+      <div id="successMsg" class="success-msg" style="display:none"></div>
+    </div>
+  </div>
+
+<script>
+const WORKER_URL = "https://btdig-proxy.cxzdsa11.workers.dev";
+
+const state = { query: "", page: 1, order: "relevance" };
+
+const $ = id => document.getElementById(id);
+const searchInput = $("searchInput"), searchBtn = $("searchBtn");
+const resultArea = $("resultArea"), magnetInput = $("magnetInput");
+const sendBtn = $("sendBtn"), successMsg = $("successMsg");
+
+// ── NAS ──────────────────────────────────────────────────────
+
+async function sendToNAS(magnet) {
+  const res = await fetch(`${WORKER_URL}/nas/download`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ magnet }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `NAS 오류 ${res.status}`);
+  }
+}
+
+// ── 이벤트 ───────────────────────────────────────────────────
+
+searchInput.addEventListener("input", () => { searchBtn.disabled = !searchInput.value.trim(); });
+searchInput.addEventListener("keydown", e => { if (e.key === "Enter" && searchInput.value.trim()) doSearch(searchInput.value, 1, state.order); });
+searchBtn.addEventListener("click", () => { if (searchInput.value.trim()) doSearch(searchInput.value, 1, state.order); });
+
+magnetInput.addEventListener("input", () => {
+  const v = magnetInput.value.trim().length > 0;
+  magnetInput.classList.toggle("has-value", v);
+  sendBtn.disabled = !v;
+  sendBtn.className = "send-btn"; sendBtn.textContent = "전송";
+  successMsg.style.display = "none";
+});
+
+sendBtn.addEventListener("click", async () => {
+  if (!magnetInput.value.trim()) return;
+
+  sendBtn.className = "send-btn pending";
+  sendBtn.textContent = "···";
+  sendBtn.disabled = true;
+
+  try {
+    await sendToNAS(magnetInput.value);
+    sendBtn.className = "send-btn success";
+    sendBtn.textContent = "✓ 완료";
+    successMsg.textContent = "✓ NAS 전송 완료";
+    successMsg.style.color = "#34d399";
+    successMsg.style.display = "block";
+  } catch (e) {
+    sendBtn.className = "send-btn";
+    sendBtn.textContent = "재시도";
+    sendBtn.disabled = false;
+    successMsg.textContent = `전송 실패: ${escHtml(e.message)}`;
+    successMsg.style.color = "#fca5a5";
+    successMsg.style.display = "block";
+  }
+});
+
+// ── 검색 ─────────────────────────────────────────────────────
+
+async function doSearch(query, page, orderby) {
+  state.query = query; state.page = page; state.order = orderby;
+  magnetInput.value = ""; magnetInput.classList.remove("has-value");
+  sendBtn.disabled = true; successMsg.style.display = "none";
+  searchBtn.disabled = true;
+  searchBtn.innerHTML = '<span class="spinner">↻</span>';
+  resultArea.innerHTML = '<div class="loading-state"><div class="spinner" style="font-size:28px">↻</div><br>BT4G 검색 중...</div>';
+
+  try {
+    const res = await fetch(`${WORKER_URL}?q=${encodeURIComponent(query)}&p=${page}&orderby=${orderby}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderResults(data.results || [], query, page, orderby);
+  } catch (e) {
+    resultArea.innerHTML = `<div class="error-box">요청 실패: ${escHtml(e.message)}</div>`;
+  } finally {
+    searchBtn.innerHTML = "검색";
+    searchBtn.disabled = !searchInput.value.trim();
+  }
+}
+
+// ── 렌더링 ───────────────────────────────────────────────────
+
+function renderResults(results, query, page, orderby) {
+  if (results.length === 0) {
+    resultArea.innerHTML = '<div class="no-results">검색 결과가 없습니다</div>';
+    return;
+  }
+
+  const sorts = [["relevance","관련순"],["time","최신순"],["size","크기순"],["seeders","시드순"]];
+  let html = '<div class="sort-bar">';
+  sorts.forEach(([val, label]) => {
+    html += `<button class="sort-btn${orderby===val?" active":""}" onclick="doSearch('${escAttr(query)}',1,'${val}')">${label}</button>`;
+  });
+  html += '</div>';
+
+  html += `<div class="results-info">${results.length}건 · 제목을 탭하면 마그넷 주소가 하단에 자동 입력됩니다</div>`;
+
+  results.forEach(item => {
+    const nameHtml = highlight(escHtml(item.name), query);
+    html += `<div class="card" data-magnet="${escAttr(item.magnet)}" onclick="selectCard(this)">
+      <div class="card-title"><span class="check-mark" style="display:none">✓</span>${nameHtml}</div>
+      <div class="card-meta">
+        ${item.size ? `<span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${escHtml(item.size)}</span>` : ""}
+        ${item.age ? `<span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${escHtml(item.age)}</span>` : ""}
+        ${item.category ? `<span class="cat-badge">${escHtml(item.category)}</span>` : ""}
+      </div>
+    </div>`;
+  });
+
+  html += `<div class="pagination">`;
+  if (page > 1) html += `<button class="page-btn" onclick="doSearch('${escAttr(query)}',${page-1},'${orderby}')">← 이전</button>`;
+  html += `<span class="page-num">페이지 ${page}</span>`;
+  html += `<button class="page-btn" onclick="doSearch('${escAttr(query)}',${page+1},'${orderby}')">다음 →</button>`;
+  html += `</div>`;
+
+  resultArea.innerHTML = html;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function selectCard(el) {
+  document.querySelectorAll(".card.selected").forEach(c => {
+    c.classList.remove("selected");
+    c.querySelector(".check-mark").style.display = "none";
+  });
+  el.classList.add("selected");
+  el.querySelector(".check-mark").style.display = "inline";
+  magnetInput.value = el.dataset.magnet;
+  magnetInput.classList.add("has-value");
+  sendBtn.disabled = false;
+  sendBtn.className = "send-btn"; sendBtn.textContent = "다운로드";
+  successMsg.style.display = "none";
+  setTimeout(() => magnetInput.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+}
+
+// ── 유틸 ─────────────────────────────────────────────────────
+
+function escHtml(s) {
+  return s ? s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") : "";
+}
+function escAttr(s) {
+  return s ? s.replace(/&/g,"&amp;").replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;") : "";
+}
+function highlight(html, q) {
+  if (!q) return html;
+  const words = q.trim().split(/\s+/).filter(x => x.length > 1);
+  if (!words.length) return html;
+  const pattern = words.map(x => escHtml(x).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  return html.replace(new RegExp(`(${pattern})`, "gi"), '<span class="highlight">$1</span>');
+}
+</script>
+</body>
+</html>
